@@ -10,6 +10,26 @@ def hello(bot, update):
 
 def weather(bot, update, zipcode=35007, hourly=False):
     print("Ran weather function")
+
+
+def tableflip(bot, update):
+    update.message.reply_text("(╯°□°）╯︵ ┻━┻")
+
+
+def unflip(bot, update):
+    update.message.reply_text(" ┬─┬ ノ( ゜-゜ノ)")
+
+
+def shrug(bot, update):
+    update.message.reply_text("¯\_(ツ)_/¯")
+
+
+def lenny(bot, update):
+    r = get("https://api.lenny.today/v1/random", verify=False).json()
+    face = r[0]["face"]
+    update.message.reply_text(face)
+
+
 def dailyweather(bot, update, zipcode="35007"):
     weather(bot, update, zipcode, hourly=False)
 
