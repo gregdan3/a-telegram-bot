@@ -10,14 +10,19 @@ def hello(bot, update):
 
 def weather(bot, update, zipcode=35007, hourly=False):
     print("Ran weather function")
+def weather(bot, update, zipcode="35007", hourly=True):
     weather_fetcher = noaa.NOAA()
     results = weather_fetcher.get_forecasts(zipcode, "US", hourly=hourly)
-    print(results)
-    for forecast in results:
-        print(forecast)
-        update.message.reply_text("%s" % forecast)
-    # parse content
-    # print it here
+    if hourly:
+        results = results[:10]  # 10 hours
+        all_forecasts = parse_all_hourly_weather(results)
+        update.message.reply_text(all_forecasts)
+    else:
+        results = results[1:6]  # each is a half day so 3 days
+        all_forecasts = parse_all_daily_weather(results)
+        update.message.reply_text(all_forecasts)
+
+
 def parse_daily_weather(daily_forecast):
     time = daily_forecast["name"]
     # temperature = f"It will be {daily_forecast['temperature']} degrees {daily_forecast['temperatureUnit']}. "
