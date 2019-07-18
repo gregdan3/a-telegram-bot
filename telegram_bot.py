@@ -10,6 +10,14 @@ def hello(bot, update):
 
 def weather(bot, update, zipcode=35007, hourly=False):
     print("Ran weather function")
+def dailyweather(bot, update, zipcode="35007"):
+    weather(bot, update, zipcode, hourly=False)
+
+
+def hourlyweather(bot, update, zipcode="35007"):
+    weather(bot, update, zipcode, hourly=True)
+
+
 def weather(bot, update, zipcode="35007", hourly=True):
     weather_fetcher = noaa.NOAA()
     results = weather_fetcher.get_forecasts(zipcode, "US", hourly=hourly)
