@@ -19,8 +19,8 @@ def hello(bot, update):
     update.message.reply_text("Hello {}".format(update.message.from_user.first_name))
 
 
-def weather(bot, update, zipcode=35007, hourly=False):
-    print("Ran weather function")
+def gay(bot, update):
+    update.message.reply_text("no u")
 
 
 def tableflip(bot, update):
