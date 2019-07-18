@@ -18,6 +18,22 @@ def weather(bot, update, zipcode=35007, hourly=False):
         update.message.reply_text("%s" % forecast)
     # parse content
     # print it here
+def parse_daily_weather(daily_forecast):
+    time = daily_forecast["name"]
+    # temperature = f"It will be {daily_forecast['temperature']} degrees {daily_forecast['temperatureUnit']}. "
+    # wind_info = daily_forecast["windSpeed"]
+    major_info = daily_forecast["detailedForecast"]
+    return f"{time}: {major_info}."
+
+
+def parse_all_daily_weather(daily_forecasts: list):
+    forecasts = list()
+    for forecast in daily_forecasts:
+        result = parse_daily_weather(forecast)
+        forecasts.append(result)
+    return "\n".join(forecasts)
+
+
 def parse_hourly_weather(hourly_forecast):
     time_start = dateparser.parse(hourly_forecast["startTime"])
     time_start = time_start.strftime("%I:%M %p")
