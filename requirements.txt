@@ -1,0 +1,3 @@
+dateparser
+python-telegram-bot
+noaa-sdk
