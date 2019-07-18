@@ -100,7 +100,16 @@ def main():
     updater = Updater(TOKEN)
 
     updater.dispatcher.add_handler(CommandHandler("hello", hello))
-    updater.dispatcher.add_handler(CommandHandler("weather", weather))
+    updater.dispatcher.add_handler(CommandHandler("weather", hourlyweather))
+    updater.dispatcher.add_handler(CommandHandler("dailyweather", dailyweather))
+
+    updater.dispatcher.add_handler(CommandHandler("tableflip", tableflip))
+    updater.dispatcher.add_handler(CommandHandler("unflip", unflip))
+    updater.dispatcher.add_handler(CommandHandler("shrug", shrug))
+
+    updater.dispatcher.add_handler(CommandHandler("lenny", lenny))
+
+    # updater.dispatcher.add_handler(CommandHandler("gay", gay))
 
     updater.start_polling()
     updater.idle()
