@@ -15,12 +15,20 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def hello(bot, update):
-    update.message.reply_text("Hello {}".format(update.message.from_user.first_name))
+def bot_help(bot, update):
+    help_text = """
+    Business Commands available:
+    weather: Fetch the next 10 hours of weather from NOAA, by hour.
+    dailyweather: Fetch the next 4 days of weather from NOAA, by half day.
 
+    Fun Commands Available:
+    tableflip: Flip a table.
+    unflip: Put a table back.
+    lenny: Random lenny face.
+    shrug: Shrug at your foes.
 
-def gay(bot, update):
-    update.message.reply_text("no u")
+    """
+    update.message.reply_text(help_text)
 
 
 def tableflip(bot, update):
@@ -99,7 +107,6 @@ def parse_all_hourly_weather(hourly_forecasts: list):
 def main():
     updater = Updater(TOKEN)
 
-    updater.dispatcher.add_handler(CommandHandler("hello", hello))
     updater.dispatcher.add_handler(CommandHandler("weather", hourlyweather))
     updater.dispatcher.add_handler(CommandHandler("dailyweather", dailyweather))
 
@@ -109,7 +116,7 @@ def main():
 
     updater.dispatcher.add_handler(CommandHandler("lenny", lenny))
 
-    # updater.dispatcher.add_handler(CommandHandler("gay", gay))
+    updater.dispatcher.add_handler(CommandHandler("help", bot_help))
 
     updater.start_polling()
     updater.idle()
