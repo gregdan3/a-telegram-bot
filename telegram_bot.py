@@ -49,6 +49,10 @@ def lenny(bot, update):
     update.message.reply_text(face)
 
 
+def weenie(bot, update):
+    update.message.reply_test("You are, in fact, a weenie.")
+
+
 def dailyweather(bot, update, zipcode="35007"):
     weather(bot, update, zipcode, hourly=False)
 
@@ -115,6 +119,8 @@ def main():
     updater.dispatcher.add_handler(CommandHandler("shrug", shrug))
 
     updater.dispatcher.add_handler(CommandHandler("lenny", lenny))
+
+    updater.dispatcher.add_handler(CommandHandler("weenie", weenie))
 
     updater.dispatcher.add_handler(CommandHandler("help", bot_help))
 
