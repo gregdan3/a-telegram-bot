@@ -50,7 +50,7 @@ def lenny(bot, update):
 
 
 def weenie(bot, update):
-    update.message.reply_test("You are, in fact, a weenie.")
+    update.message.reply_text("You are, in fact, a weenie.")
 
 
 def dailyweather(bot, update, zipcode="35007"):
