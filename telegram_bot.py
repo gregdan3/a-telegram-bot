@@ -5,6 +5,7 @@ import dateparser
 from telegram.ext import Updater, CommandHandler
 from noaa_sdk import noaa
 from requests import get
+from random import choice
 
 from credentials import TOKEN
 
@@ -13,6 +14,45 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+
+DINNERS = [
+    "hot dogs",
+    "spaghetti",
+    "carne asada",
+    "pizza, but from the store",
+    "pizza, but order it",
+    "tacos",
+    "pizza, but home made",
+    "macaroni and cheese",
+    "egg noodles with beef tips",
+    "red beans and rice",
+    "gumbo",
+    "jumbalya",
+    "pot roast",
+    "hamburger steak",
+    "corndogs",
+    "fried chicken",
+    "rotisserie chicken",
+    "Popeyes",
+    "cheese sticks",
+    "pancakes",
+    "salad",
+    "sandwiches",
+    "fish sticks",
+    "tater tots",
+    "tuna fish salad",
+    "lasagna",
+    "mexican lasagna",
+    "hamburgers",
+    "pasta salad",
+    "chinese",
+]
+
+
+def dinner(bot, update):
+    dinner_option = f"You should have {choice(DINNERS)} for dinner!"
+    update.message.reply_text(dinner_option)
 
 
 def bot_help(bot, update):
@@ -26,6 +66,7 @@ def bot_help(bot, update):
     unflip: Put a table back.
     lenny: Random lenny face.
     shrug: Shrug at your foes.
+    dinner: Choose a random meal for dinner.
 
     """
     update.message.reply_text(help_text)
