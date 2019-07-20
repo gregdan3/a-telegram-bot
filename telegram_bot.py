@@ -162,6 +162,7 @@ def main():
     updater.dispatcher.add_handler(CommandHandler("lenny", lenny))
 
     updater.dispatcher.add_handler(CommandHandler("weenie", weenie))
+    updater.dispatcher.add_handler(CommandHandler("dinner", dinner))
 
     updater.dispatcher.add_handler(CommandHandler("help", bot_help))
 
