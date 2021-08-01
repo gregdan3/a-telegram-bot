@@ -1,6 +1,7 @@
-__pycache__
-__pycache__/*
+__pycache__/
 credentials.py
 config.py
 
 local*
+.pdm.toml
+__pypackages__/

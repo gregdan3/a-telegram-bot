@@ -1,0 +1,25 @@
+[project]
+name = "sea_turtle_bot"
+version = "0.0.1"
+description = "my family's telegram bot, for fun"
+authors = [
+    {name = "Gregory Danielson", email = "gregory.danielson3@gmail.com"},
+]
+dependencies = [
+    "dateparser~=1.0",
+    "python-telegram-bot~=13.7",
+    "noaa-sdk~=0.1",
+]
+requires-python = ">=3.8"
+dynamic = [""]
+license = {text = "GPL-3.0-or-later"}
+
+[project.urls]
+homepage = ""
+
+[build-system]
+requires = ["pdm-pep517"]
+build-backend = "pdm.pep517.api"
+
+[tool]
+[tool.pdm]
