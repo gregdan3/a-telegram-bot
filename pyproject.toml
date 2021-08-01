@@ -6,9 +6,7 @@ authors = [
     {name = "Gregory Danielson", email = "gregory.danielson3@gmail.com"},
 ]
 dependencies = [
-    "dateparser~=1.0",
     "python-telegram-bot~=13.7",
-    "noaa-sdk~=0.1",
 ]
 requires-python = ">=3.8"
 dynamic = [""]
