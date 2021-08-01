@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 import logging
+from functools import partial
 
-import dateparser
-from telegram.ext import Updater, CommandHandler
-from noaa_sdk import noaa
 from requests import get
-from random import choice
+from telegram.error import TelegramError
+from telegram.ext import CommandHandler, Updater
 
 from credentials import TOKEN
 
@@ -15,156 +14,99 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-
-DINNERS = [
-    "hot dogs",
-    "spaghetti",
-    "carne asada",
-    "pizza, but from the store",
-    "pizza, but order it",
-    "tacos",
-    "pizza, but home made",
-    "macaroni and cheese",
-    "egg noodles with beef tips",
-    "red beans and rice",
-    "gumbo",
-    "jumbalya",
-    "pot roast",
-    "hamburger steak",
-    "corndogs",
-    "fried chicken",
-    "rotisserie chicken",
-    "Popeyes",
-    "cheese sticks",
-    "pancakes",
-    "salad",
-    "sandwiches",
-    "fish sticks",
-    "tater tots",
-    "tuna fish salad",
-    "lasagna",
-    "mexican lasagna",
-    "hamburgers",
-    "pasta salad",
-    "chinese",
-]
+MEALPAGE = r"https://www.themealdb.com/api/json/v1/1/random.php"
+LENNYPAGE = r"https://api.lenny.today/v1/random"
+WTTRPAGE = r"https://wttr.in/?format=%c+%l:+%C+%t+%w+%h"
+TABLEFLIP = r"(╯°□°）╯︵ ┻━┻"
+UNFLIP = r" ┬─┬ ノ( ゜-゜ノ)"
+SHRUG = r"¯\_(ツ)_/¯"
 
 
-def dinner(bot, update):
-    dinner_option = f"You should have {choice(DINNERS)} for dinner!"
-    update.message.reply_text(dinner_option)
+def reply(update, context, text):
+    """to be used with partial, but that only passes leftmost *args"""
+    update.message.reply_text(text)
 
 
-def bot_help(bot, update):
-    help_text = """
-    Business Commands available:
-    weather: Fetch the next 10 hours of weather from NOAA, by hour.
-    dailyweather: Fetch the next 4 days of weather from NOAA, by half day.
+def long_parse_meal(mealjson):
+    mealjson = mealjson["meals"][0]  # unwrap
+    name = mealjson["strMeal"]
+    kind = mealjson["strCategory"]
+    origin = mealjson["strArea"]
+    instructions = mealjson["strInstructions"]
+    image = mealjson["strMealThumb"]
 
-    Fun Commands Available:
-    tableflip: Flip a table.
-    unflip: Put a table back.
-    lenny: Random lenny face.
-    shrug: Shrug at your foes.
-    dinner: Choose a random meal for dinner.
-
-    """
-    update.message.reply_text(help_text)
-
-
-def tableflip(bot, update):
-    update.message.reply_text("(╯°□°）╯︵ ┻━┻")
-
-
-def unflip(bot, update):
-    update.message.reply_text(" ┬─┬ ノ( ゜-゜ノ)")
-
-
-def shrug(bot, update):
-    update.message.reply_text("¯\_(ツ)_/¯")
-
-
-def lenny(bot, update):
-    r = get("https://api.lenny.today/v1/random", verify=False).json()
-    face = r[0]["face"]
-    update.message.reply_text(face)
-
-
-def weenie(bot, update):
-    update.message.reply_text("You are, in fact, a weenie.")
-
-
-def dailyweather(bot, update, zipcode="35007"):
-    weather(bot, update, zipcode, hourly=False)
-
-
-def hourlyweather(bot, update, zipcode="35007"):
-    weather(bot, update, zipcode, hourly=True)
-
-
-def weather(bot, update, zipcode="35007", hourly=True):
-    weather_fetcher = noaa.NOAA()
-    results = weather_fetcher.get_forecasts(zipcode, "US", hourly=hourly)
-    if hourly:
-        results = results[:10]  # 10 hours
-        all_forecasts = parse_all_hourly_weather(results)
-        update.message.reply_text(all_forecasts)
-    else:
-        results = results[1:6]  # each is a half day so 3 days
-        all_forecasts = parse_all_daily_weather(results)
-        update.message.reply_text(all_forecasts)
-
-
-def parse_daily_weather(daily_forecast):
-    time = daily_forecast["name"]
-    # temperature = f"It will be {daily_forecast['temperature']} degrees {daily_forecast['temperatureUnit']}. "
-    # wind_info = daily_forecast["windSpeed"]
-    major_info = daily_forecast["detailedForecast"]
-    return f"{time}: {major_info}."
-
-
-def parse_all_daily_weather(daily_forecasts: list):
-    forecasts = list()
-    for forecast in daily_forecasts:
-        result = parse_daily_weather(forecast)
-        forecasts.append(result)
-    return "\n".join(forecasts)
-
-
-def parse_hourly_weather(hourly_forecast):
-    time_start = dateparser.parse(hourly_forecast["startTime"])
-    time_start = time_start.strftime("%I:%M %p")
-    temperature = (
-        f"{hourly_forecast['temperature']} {hourly_forecast['temperatureUnit']}"
+    # this is the worst thing i've ever written
+    ingredients = ", ".join(
+        [
+            f"{mealjson[f'strMeasure{i}']} {mealjson[f'strIngredient{i}']}".strip()
+            for i in range(1, 21)
+            if mealjson[f"strIngredient{i}"]
+        ]
     )
-    major_info = hourly_forecast["shortForecast"]
-    return f"{time_start}: {temperature}. {major_info}."
+    return f"{name}\n\nA(n) {origin} meal, {kind}\n{instructions}\n\n{ingredients}\n\n{image}"
 
 
-def parse_all_hourly_weather(hourly_forecasts: list):
-    forecasts = list()
-    for forecast in hourly_forecasts:
-        result = parse_hourly_weather(forecast)
-        forecasts.append(result)
-    return "\n".join(forecasts)
+def meal(update, context, long=False):
+    r = get(MEALPAGE).json()
+    if long:
+        mealtext = long_parse_meal(r)
+    else:
+        mealtext = f"You should have {r['meals'][0]['strMeal']} to eat!"
+    update.message.reply_text(mealtext)
+
+
+def lenny(update, context):
+    r = get(LENNYPAGE).json()[0]["face"]
+    update.message.reply_text(r)
+
+
+def error(update, context, error):
+    # TODO
+    update.message.reply_text(error.__str__)
+
+
+def weather(update, context):
+    r = get(WTTRPAGE).text
+    update.message.reply_text(r)
 
 
 def main():
+    # help is a special case of the constants
+    HELP = ""
+
     updater = Updater(TOKEN)
 
-    updater.dispatcher.add_handler(CommandHandler("weather", hourlyweather))
-    updater.dispatcher.add_handler(CommandHandler("dailyweather", dailyweather))
+    updater.dispatcher.add_handler(
+        CommandHandler("tableflip", partial(reply, text=TABLEFLIP))
+    )
+    HELP += "tableflip: Flip a table\n"
 
-    updater.dispatcher.add_handler(CommandHandler("tableflip", tableflip))
-    updater.dispatcher.add_handler(CommandHandler("unflip", unflip))
-    updater.dispatcher.add_handler(CommandHandler("shrug", shrug))
+    updater.dispatcher.add_handler(
+        CommandHandler("unflip", partial(reply, text=UNFLIP))
+    )
+    HELP += "unflip: Put a table back\n"
+
+    updater.dispatcher.add_handler(CommandHandler("shrug", partial(reply, text=SHRUG)))
+    HELP += "shrug: Shrug at your foes\n"
 
     updater.dispatcher.add_handler(CommandHandler("lenny", lenny))
+    HELP += "lenny: Random lenny face\n"
 
-    updater.dispatcher.add_handler(CommandHandler("weenie", weenie))
-    updater.dispatcher.add_handler(CommandHandler("dinner", dinner))
+    HELP += "\n"
 
-    updater.dispatcher.add_handler(CommandHandler("help", bot_help))
+    updater.dispatcher.add_handler(CommandHandler("weather", weather))
+    HELP += "weather: Fetch the current weather from wttr.in\n"
+
+    updater.dispatcher.add_handler(CommandHandler("meal", meal))
+    HELP += "meal: Get a randomly selected meal\n"
+
+    updater.dispatcher.add_handler(CommandHandler("longmeal", partial(meal, long=True)))
+    HELP += "longmeal: Get a randomly selected meal with instructions and ingredients\n"
+
+    updater.dispatcher.add_handler(CommandHandler("help", partial(reply, text=HELP)))
+    HELP += "help: Send this message!"
+
+    # TODO: error handler
 
     updater.start_polling()
     updater.idle()
